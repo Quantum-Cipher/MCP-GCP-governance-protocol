@@ -1,20 +1,25 @@
-# Eternum MCP-GCP Governance Protocol
+# MCP GCP Governance Protocol
 
-Governance layer for the Eternum ecosystem (Mycelium Oracle + Starling + Neurological + Vertex Agents).
+A hardened governance control service for GCP-oriented deployment workflows.
 
-**Purpose**
-- Enforce policy on deployments, code changes, and agent actions.
-- Link Whitepaper (Constitution) principles to execution (Factory).
-- Provide auditable decisions for Liftoff-Deployment-Governor.
+## Purpose
+This service evaluates deployment actions against policy before liftoff, rebuild, rollback, or validation operations proceed.
 
-**Endpoints**
-- GET /healthz
-- GET /readyz
-- POST /governance/evaluate
+## v2 Scope
+- policy-based allow / deny decisions
+- signed commit enforcement
+- environment gating
+- change-window checks
+- provenance requirement flag
+- structured JSON decision logs
+- health and readiness endpoints
+- Cloud Run containerization
+- starter schema set for future MCP-style tool integration
 
-**Integration**
-Add this service as a custom OpenAPI tool in Vertex AI Agent Builder.
-Later: wrap with MCP SDK for broader protocol compatibility.
-
-Eternum369 canonical — Database rules. Memory summarizes. 333-369-666-888-999 frequency respected as metadata.
-Eternum Whitepaper loaded as constitutional reference.
+## Local bootstrap
+```bash
+python3 -m venv .venv
+source .venv/bin/activate
+python -m pip install --upgrade pip
+pip install -r requirements.txt
+python app/main.py
