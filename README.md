@@ -17,3 +17,4 @@ Add this service as a custom OpenAPI tool in Vertex AI Agent Builder.
 Later: wrap with MCP SDK for broader protocol compatibility.
 
 Eternum369 canonical — Database rules. Memory summarizes. 333-369-666-888-999 frequency respected as metadata.
+Eternum Whitepaper loaded as constitutional reference.
