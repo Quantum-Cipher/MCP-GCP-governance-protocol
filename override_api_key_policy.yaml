@@ -1,0 +1,4 @@
+name: projects/logfox-api-daemon/policies/iam.managed.disableServiceAccountApiKeyCreation
+spec:
+  rules:
+  - enforce: false
