@@ -1,0 +1,9 @@
+[project]
+name = "eternum-liftoff-agent"
+version = "0.1.0"
+requires-python = ">=3.11"
+dependencies = [
+  "google-adk>=1.28.1",
+  "google-cloud-aiplatform>=1.146.0",
+  # plus any extra libs your agent needs
+]
