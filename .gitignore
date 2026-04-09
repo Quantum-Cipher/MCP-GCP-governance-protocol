@@ -45,3 +45,4 @@ logs/
 # Cloud / local temp
 tmp/
 .cache/
+nano
