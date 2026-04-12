@@ -16,7 +16,7 @@ variable "region" {
 }
 
 variable "github_org" {
-  description = "GitHub organisation or username that owns the repository."
+  description = "GitHub organization or username that owns the repository."
   type        = string
   default     = "Quantum-Cipher"
 }
