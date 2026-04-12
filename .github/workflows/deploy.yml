@@ -1,0 +1,79 @@
+name: Deploy to Cloud Run
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - main
+
+env:
+  PROJECT_ID: logfox-api-daemon
+  REGION: us-central1
+  REPOSITORY: governance
+  IMAGE: mcp-gcp-governance-protocol
+  SERVICE: mcp-gcp-governance-protocol
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    permissions:
+      contents: read
+      id-token: write   # required for OIDC token exchange with WIF
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      # Fail closed immediately if either auth secret is absent.
+      # Secrets evaluate to an empty string when unset, so we use a
+      # shell test rather than an Actions expression (which would print
+      # the value on failure).
+      - name: Validate required auth secrets
+        shell: bash
+        run: |
+          missing=()
+          [[ -n "$GCP_WIF_PROVIDER" ]] || missing+=(GCP_WIF_PROVIDER)
+          [[ -n "$GCP_DEPLOYER_SA"  ]] || missing+=(GCP_DEPLOYER_SA)
+          if [[ ${#missing[@]} -gt 0 ]]; then
+            echo "ERROR: the following required secrets are not set: ${missing[*]}" >&2
+            exit 1
+          fi
+        env:
+          GCP_WIF_PROVIDER: ${{ secrets.GCP_WIF_PROVIDER }}
+          GCP_DEPLOYER_SA:  ${{ secrets.GCP_DEPLOYER_SA }}
+
+      - name: Authenticate to Google Cloud via Workload Identity Federation
+        uses: google-github-actions/auth@v2
+        with:
+          workload_identity_provider: ${{ secrets.GCP_WIF_PROVIDER }}
+          service_account: ${{ secrets.GCP_DEPLOYER_SA }}
+
+      - name: Set up gcloud CLI
+        uses: google-github-actions/setup-gcloud@v2
+
+      - name: Configure Docker for Artifact Registry
+        run: gcloud auth configure-docker ${{ env.REGION }}-docker.pkg.dev --quiet
+
+      - name: Build and push Docker image
+        run: |
+          IMAGE_URI="${{ env.REGION }}-docker.pkg.dev/${{ env.PROJECT_ID }}/${{ env.REPOSITORY }}/${{ env.IMAGE }}:${{ github.sha }}"
+          docker build --tag "${IMAGE_URI}" .
+          docker push "${IMAGE_URI}"
+          echo "IMAGE_URI=${IMAGE_URI}" >> "$GITHUB_ENV"
+
+      - name: Deploy to Cloud Run
+        run: |
+          gcloud run deploy "${{ env.SERVICE }}" \
+            --image "${{ env.IMAGE_URI }}" \
+            --region "${{ env.REGION }}" \
+            --platform managed \
+            --allow-unauthenticated \
+            --port 8080 \
+            --set-env-vars "APP_ENV=production,PROJECT_ID=${{ env.PROJECT_ID }},REGION=${{ env.REGION }},SERVICE_NAME=${{ env.SERVICE }}"
+
+      - name: Print service URL
+        run: |
+          gcloud run services describe "${{ env.SERVICE }}" \
+            --region "${{ env.REGION }}" \
+            --format "value(status.url)"

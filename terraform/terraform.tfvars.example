@@ -1,0 +1,8 @@
+# Copy to terraform.tfvars and fill in project_number before running.
+# terraform.tfvars is gitignored – never commit real values.
+
+project_id     = "logfox-api-daemon"
+project_number = "REPLACE_WITH_NUMERIC_PROJECT_NUMBER"
+region         = "us-central1"
+github_org     = "Quantum-Cipher"
+github_repo    = "MCP-GCP-governance-protocol"
